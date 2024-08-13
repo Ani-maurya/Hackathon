@@ -2,16 +2,15 @@ const fs = require('fs');
 const axios = require('axios');
 const path = require('path');
 
-// Path to the converted Postman collection
 const collectionPath = path.join(__dirname, 'postman-collection.json');
-
-// Read the collection file
 const collectionData = fs.readFileSync(collectionPath, 'utf8');
 
 // Replace with your Postman API key
 const postmanApiKey = 'your-postman-api-key';
 
-// Define the request to import the collection
+// Set your desired collection name here
+const collectionName = 'Petstore';
+
 const options = {
     method: 'POST',
     url: 'https://api.getpostman.com/collections',
@@ -20,7 +19,13 @@ const options = {
         'Content-Type': 'application/json'
     },
     data: JSON.stringify({
-        collection: JSON.parse(collectionData)
+        collection: {
+            ...JSON.parse(collectionData),
+            info: {
+                ...JSON.parse(collectionData).info,
+                name: collectionName
+            }
+        }
     })
 };
 
