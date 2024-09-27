@@ -1,34 +1,18 @@
 const fs = require('fs');
-const axios = require('axios');
 const path = require('path');
+const converter = require('openapi-to-postmanv2');
 
-// Path to the converted Postman collection
-const collectionPath = path.join(__dirname, 'postman-collection.json');
+const specPath = path.join(__dirname, 'Petstore.yaml');
+const openApiSpec = fs.readFileSync(specPath, 'utf8');
 
-// Read the collection file
-const collectionData = fs.readFileSync(collectionPath, 'utf8');
+converter.convert({ type: 'string', data: openApiSpec }, {}, (err, conversionResult) => {
+            if (!conversionResult.result) {
+                            console.error('Could not convert', conversionResult.reason);
+                        } else {
+                                        const postmanCollection = conversionResult.output[0].data;
+                                        const outputPath = path.join(__dirname, 'postman-collection.json');
+                                        fs.writeFileSync(outputPath, JSON.stringify(postmanCollection, null, 2));
+                                        console.log('Postman collection successfully written to', outputPath);
+                                    }
+});
 
-// Replace with your Postman API key
-const postmanApiKey = 'your-postman-api-key';
-
-// Define the request to import the collection
-const options = {
-    method: 'POST',
-    url: 'https://api.getpostman.com/collections',
-    headers: {
-        'X-Api-Key': postmanApiKey,
-        'Content-Type': 'application/json'
-    },
-    data: JSON.stringify({
-        collection: JSON.parse(collectionData)
-    })
-};
-
-// Make the request to import the collection
-axios(options)
-    .then(response => {
-        console.log('Collection successfully imported to Postman:', response.data);
-    })
-    .catch(error => {
-        console.error('Error importing collection:', error.response.data);
-    });
